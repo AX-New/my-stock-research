@@ -53,7 +53,11 @@ my-stock-research/
 │   └── data/                ← 研究数据（CSV等）
 ├── la/scripts/              ← LA 选股分析脚本
 ├── lib/                     ← 公共基础设施（config/database/logger）
-├── docs/constraints/        ← 项目级约束（复权选型/语雀目录）
+├── scripts/                 ← 工具脚本（Tushare 文档同步/数据检查）
+├── tushare_docs/            ← Tushare 接口文档（离线查阅）
+├── docs/                    ← 项目文档
+│   ├── constraints/         ← 项目级约束（复权选型/语雀目录）
+│   └── database.md          ← 数据库设计文档（双库表结构）
 ├── task/                    ← 研究任务（完成后归档删除）
 ├── CLAUDE.md
 ├── PROGRESS.md
@@ -70,7 +74,18 @@ my-stock-research/
 
 ### 脚本管理
 
-新增或修改脚本时必须同步更新对应目录的 `00-脚本使用说明.md`。
+脚本分三层存放：
+
+| 目录 | 用途 | 说明 |
+|------|------|------|
+| `scripts/` | 工具脚本 | Tushare 文档爬取、数据检查，与研究主题无关 |
+| `{topic}/scripts/` | 主题研究脚本 | 每个主题独立（有自己的 config/database/models） |
+| `la/scripts/` | LA 选股分析脚本 | 分析选股结果、评估模型表现 |
+
+**规则：**
+- 新增或修改脚本时**必须同步更新**对应目录的 `00-脚本使用说明.md`
+- 各主题 `scripts/` 有独立的 `config.py` / `database.py`，**不要跨主题引用**
+- 需要新数据时，先查 `docs/database.md` 看 my_stock 库是否已有，没有则查 `tushare_docs/` 自行接入
 
 ### 文档命名
 
