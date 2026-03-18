@@ -1,14 +1,28 @@
 # 数据库设计文档
 **创建时间**: 20260319
 
-## 双库架构
+## 多库架构
 
-| 库 | 用途 | 引擎 | 说明 |
-|----|------|------|------|
-| `my_stock` | 读生产数据 | `read_engine` | my-stock 项目维护，Tushare 同步入库 |
-| `stock_research` | 写研究结果 | `write_engine` | 本项目维护，各主题计算结果 |
+### 读取库（只读，由其他项目维护）
 
-连接配置在 `lib/config.py` 或各主题 `scripts/config.py`。
+| 库 | 用途 | 数据来源 |
+|----|------|---------|
+| `my_stock` | K线、基本面、财务、资金流向、LA选股 | my-stock 项目（Tushare 同步） |
+| `my_trend` | 舆情、热度排名、新闻 | my-trend 项目（爬虫采集） |
+
+### 写入库（每主题独立，本项目维护）
+
+每个研究主题自行创建独立数据库，命名 `stock_{topic}`：
+
+| 主题 | 库名 | 内容 |
+|------|------|------|
+| MACD | `stock_research` | 指数/个股/行业 MACD 指标 + 信号 |
+| RSI | `stock_rsi` | 指数/个股 RSI 指标 + 信号 |
+| 换手率 | `stock_turnover` | 个股换手率信号 |
+| 均线 | `stock_ma` | 均线信号 |
+| 新主题 | `stock_{topic}` | 按规范自建 |
+
+连接配置在各主题 `scripts/config.py`，数据库自动创建由 `scripts/database.py` 负责。
 
 ---
 
@@ -74,9 +88,26 @@
 
 ---
 
-## stock_research 库 — 研究产出表
+## my_trend 库 — 舆情热度数据（只读）
 
-### MACD 主题
+由 my-trend 项目维护，爬虫定时采集。
+
+| 表名 | 行数 | 说明 | 关键字段 |
+|------|------|------|---------|
+| `popularity_rank` | ~200万 | 东方财富人气排名 | stock_code, date, rank, new_price, change_rate, volume_ratio, turnover_rate |
+| `em_hot_rank_detail` | ~200万 | 东财热度明细 | stock_code, timestamp, rank, new_fans, hardcore_fans |
+| `em_hot_keyword` | ~4000 | 热门概念关键词 | stock_code, timestamp, concept_name, heat |
+| `articles` | ~600 | 新闻舆情文章 | source, category(news/finance/forum/stock), stock_code, title, content, summary(LLM摘要), sentiment(positive/negative/neutral) |
+
+连接方式：在 `config.py` 中新增 `TREND_DB_URI`，指向 `my_trend` 库即可。
+
+---
+
+## 研究产出库 — 每主题独立
+
+每个研究主题自行创建独立数据库（`stock_{topic}`），在各主题 `scripts/config.py` 中配置 `WRITE_DB_NAME`。
+
+### stock_research（MACD）
 
 | 表名 | 说明 |
 |------|------|
@@ -87,9 +118,33 @@
 | `stock_macd_signal` | 个股 MACD 信号（金叉/死叉） |
 | `stock_macd_signal_stats` | 信号统计汇总 |
 
-### 其他主题（按需创建）
+### stock_rsi（RSI）
 
-各主题的 `scripts/models.py` 定义写入表结构，运行 `init_research_tables()` 自动建表。
+| 表名 | 说明 |
+|------|------|
+| `stock_rsi_daily_qfq/hfq/bfq` | 个股 RSI（按复权类型） |
+| `sw_rsi_daily/weekly` | 申万行业 RSI |
+| `stock_rsi_signal` | 个股 RSI 信号 |
+| `stock_rsi_signal_stats` | 信号统计汇总 |
+
+### stock_turnover（换手率）
+
+| 表名 | 说明 |
+|------|------|
+| `index_turnover_signal` | 指数换手率信号 |
+| `stock_turnover_signal` | 个股换手率信号 |
+| `stock_turnover_signal_stats` | 信号统计汇总 |
+
+### stock_ma（均线）
+
+各主题的表结构由 `scripts/models.py` 定义，`scripts/database.py` 自动建库建表。
+
+### 新主题
+
+新建研究主题时：
+1. 在 `scripts/config.py` 设置 `WRITE_DB_NAME = "stock_{topic}"`
+2. 在 `scripts/models.py` 定义表结构
+3. 在 `scripts/database.py` 中创建引擎和 `init_research_tables()`
 
 ---
 

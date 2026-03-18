@@ -99,15 +99,17 @@ my-stock-research/
 
 ## 数据库
 
-双库设计，配置在 `lib/config.py`（或各主题 `scripts/config.py`）。
+配置在 `lib/config.py`（或各主题 `scripts/config.py`）。
 完整表结构和字段说明见 **`docs/database.md`**。
 
-| 库 | 用途 | 引擎变量 |
-|----|------|---------|
-| `my_stock` | 读生产数据 | `read_engine` |
-| `stock_research` | 写研究结果 | `write_engine` |
+### 读取库（只读）
 
-### my_stock 可用数据（只读）
+| 库 | 用途 | 数据来源 |
+|----|------|---------|
+| `my_stock` | K线、基本面、财务、资金流向、LA选股 | my-stock 项目 Tushare 同步 |
+| `my_trend` | 舆情、热度排名、新闻 | my-trend 项目爬虫采集 |
+
+**my_stock 可用数据：**
 
 | 类别 | 主要表 | 数据内容 |
 |------|--------|---------|
@@ -118,15 +120,35 @@ my-stock-research/
 | 财务数据 | `finance_income/balancesheet/cashflow/fina_indicator` | 利润表、资产负债表、现金流、财务指标 |
 | LA 选股 | `la_pick`, `la_indicator` | 选股结果、技术指标 |
 
-### stock_research 研究产出（读写）
+**my_trend 可用数据：**
 
-各主题计算结果写入此库（如 MACD 信号表、RSI 信号表等），具体表结构由各主题 `scripts/models.py` 定义。
+| 表 | 数据内容 |
+|----|---------|
+| `popularity_rank` | 东方财富人气排名（排名/价格/涨跌幅/量比/换手率） |
+| `em_hot_rank_detail` | 东财热度明细（排名/新增粉丝/铁杆粉丝） |
+| `em_hot_keyword` | 热门概念关键词（概念名/热度值） |
+| `articles` | 新闻舆情（来源/标题/正文/LLM摘要/情感分析） |
+
+### 写入库（每主题独立）
+
+每个研究主题如需写入计算结果，**自行创建独立数据库**，命名 `stock_{topic}`：
+
+| 主题 | 写入库 | 内容 |
+|------|--------|------|
+| MACD | `stock_research` | 指数/个股/行业 MACD 指标 + 信号 |
+| RSI | `stock_rsi` | 指数/个股 RSI 指标 + 信号 |
+| 换手率 | `stock_turnover` | 个股换手率信号 |
+| 均线 | `stock_ma` | 均线信号 |
+| 新主题 | `stock_{topic}` | 按规范自建 |
+
+各主题的 `scripts/config.py` 定义自己的 `WRITE_DB_NAME`，`scripts/database.py` 负责自动建库。
+表结构由 `scripts/models.py` 定义。
 
 ### 数据查找流程
 
-1. 先查 `docs/database.md` 看 my_stock 库是否已有所需数据
+1. 先查 `docs/database.md` 看 my_stock / my_trend 库是否已有所需数据
 2. 没有则查 `tushare_docs/interface_catalog.csv` 找接口，详情在 `tushare_docs/document/2/doc_id-{id}.md`
-3. 可直接调 Tushare API 获取，或联系 my-stock 项目接入同步
+3. 可直接调 Tushare API 获取，或联系 my-stock / my-trend 项目接入同步
 
 ## 项目约束
 
