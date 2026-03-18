@@ -99,56 +99,32 @@ my-stock-research/
 
 ## 数据库
 
-配置在 `lib/config.py`（或各主题 `scripts/config.py`）。
-完整表结构和字段说明见 **`docs/database.md`**。
+### 读取库（只读，由其他项目维护）
 
-### 读取库（只读）
+| 库 | 说明 | 数据表目录 |
+|----|------|-----------|
+| `my_stock` | A股全量数据：行情K线、基本面、财务、资金流向、指数、宏观经济、LA选股 | `docs/010-my_stock数据表.md` |
+| `my_trend` | 舆情数据：东财热度排名、股吧情感、新闻LLM分析 | `docs/020-my_trend数据表.md` |
 
-| 库 | 用途 | 数据来源 |
-|----|------|---------|
-| `my_stock` | K线、基本面、财务、资金流向、LA选股 | my-stock 项目 Tushare 同步 |
-| `my_trend` | 舆情、热度排名、新闻 | my-trend 项目爬虫采集 |
+需要数据时先查上述文档。如需 Tushare 未同步的接口，查 `tushare_docs/interface_catalog.csv` 定位后自行调用。
 
-**my_stock 可用数据：**
+### 写入库（每主题独立，自行创建）
 
-| 类别 | 主要表 | 数据内容 |
-|------|--------|---------|
-| 基础数据 | `stock_basic`, `index_basic`, `trade_cal` | 股票/指数列表、交易日历 |
-| 个股行情 | `market_daily/weekly/monthly`, `adj_factor`, `daily_basic` | K线(不复权)、复权因子、PE/PB/换手率/市值 |
-| 指数行情 | `index_daily/weekly/monthly`, `sw_daily` | 指数K线、申万行业K线 |
-| 资金流向 | `moneyflow`, `moneyflow_ind_dc`, `moneyflow_mkt_dc` | 个股/行业/大盘资金流向 |
-| 财务数据 | `finance_income/balancesheet/cashflow/fina_indicator` | 利润表、资产负债表、现金流、财务指标 |
-| LA 选股 | `la_pick`, `la_indicator` | 选股结果、技术指标 |
+每个研究主题创建独立数据库，命名 `stock_{topic}`：
 
-**my_trend 可用数据：**
+| 已有 | 库名 |
+|------|------|
+| MACD | `stock_research` |
+| RSI | `stock_rsi` |
+| 换手率 | `stock_turnover` |
+| 均线 | `stock_ma` |
 
-| 表 | 数据内容 |
-|----|---------|
-| `popularity_rank` | 东方财富人气排名（排名/价格/涨跌幅/量比/换手率） |
-| `em_hot_rank_detail` | 东财热度明细（排名/新增粉丝/铁杆粉丝） |
-| `em_hot_keyword` | 热门概念关键词（概念名/热度值） |
-| `articles` | 新闻舆情（来源/标题/正文/LLM摘要/情感分析） |
+**新主题接入规则：**
+1. `scripts/config.py` 设置 `WRITE_DB_NAME = "stock_{topic}"`
+2. `scripts/database.py` 创建引擎 + 自动建库
+3. `scripts/models.py` 定义表结构
 
-### 写入库（每主题独立）
-
-每个研究主题如需写入计算结果，**自行创建独立数据库**，命名 `stock_{topic}`：
-
-| 主题 | 写入库 | 内容 |
-|------|--------|------|
-| MACD | `stock_research` | 指数/个股/行业 MACD 指标 + 信号 |
-| RSI | `stock_rsi` | 指数/个股 RSI 指标 + 信号 |
-| 换手率 | `stock_turnover` | 个股换手率信号 |
-| 均线 | `stock_ma` | 均线信号 |
-| 新主题 | `stock_{topic}` | 按规范自建 |
-
-各主题的 `scripts/config.py` 定义自己的 `WRITE_DB_NAME`，`scripts/database.py` 负责自动建库。
-表结构由 `scripts/models.py` 定义。
-
-### 数据查找流程
-
-1. 先查 `docs/database.md` 看 my_stock / my_trend 库是否已有所需数据
-2. 没有则查 `tushare_docs/interface_catalog.csv` 找接口，详情在 `tushare_docs/document/2/doc_id-{id}.md`
-3. 可直接调 Tushare API 获取，或联系 my-stock / my-trend 项目接入同步
+各主题连接配置在自己的 `scripts/config.py`，**不要跨主题共享写入库**。
 
 ## 项目约束
 
