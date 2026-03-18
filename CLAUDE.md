@@ -99,12 +99,34 @@ my-stock-research/
 
 ## 数据库
 
-双库设计，配置在 `lib/config.py`（或各主题 `scripts/config.py`）：
+双库设计，配置在 `lib/config.py`（或各主题 `scripts/config.py`）。
+完整表结构和字段说明见 **`docs/database.md`**。
 
 | 库 | 用途 | 引擎变量 |
 |----|------|---------|
-| `my_stock` | 读生产数据（K线、基本面等） | `read_engine` |
-| `stock_research` | 写研究结果（信号、统计表） | `write_engine` |
+| `my_stock` | 读生产数据 | `read_engine` |
+| `stock_research` | 写研究结果 | `write_engine` |
+
+### my_stock 可用数据（只读）
+
+| 类别 | 主要表 | 数据内容 |
+|------|--------|---------|
+| 基础数据 | `stock_basic`, `index_basic`, `trade_cal` | 股票/指数列表、交易日历 |
+| 个股行情 | `market_daily/weekly/monthly`, `adj_factor`, `daily_basic` | K线(不复权)、复权因子、PE/PB/换手率/市值 |
+| 指数行情 | `index_daily/weekly/monthly`, `sw_daily` | 指数K线、申万行业K线 |
+| 资金流向 | `moneyflow`, `moneyflow_ind_dc`, `moneyflow_mkt_dc` | 个股/行业/大盘资金流向 |
+| 财务数据 | `finance_income/balancesheet/cashflow/fina_indicator` | 利润表、资产负债表、现金流、财务指标 |
+| LA 选股 | `la_pick`, `la_indicator` | 选股结果、技术指标 |
+
+### stock_research 研究产出（读写）
+
+各主题计算结果写入此库（如 MACD 信号表、RSI 信号表等），具体表结构由各主题 `scripts/models.py` 定义。
+
+### 数据查找流程
+
+1. 先查 `docs/database.md` 看 my_stock 库是否已有所需数据
+2. 没有则查 `tushare_docs/interface_catalog.csv` 找接口，详情在 `tushare_docs/document/2/doc_id-{id}.md`
+3. 可直接调 Tushare API 获取，或联系 my-stock 项目接入同步
 
 ## 项目约束
 
