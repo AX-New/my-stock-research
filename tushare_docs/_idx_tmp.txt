@@ -1,0 +1,20 @@
+depth=1 | ['指数专题'] | share.pro/document/2?doc_id=93
+depth=2 | ['指数专题', '指数基本信息'] | share.pro/document/2?doc_id=94
+depth=2 | ['指数专题', '指数日线行情'] | share.pro/document/2?doc_id=95
+depth=2 | ['指数专题', '指数实时日线'] | hare.pro/document/2?doc_id=403
+depth=2 | ['指数专题', '指数实时分钟'] | hare.pro/document/2?doc_id=420
+depth=2 | ['指数专题', '指数周线行情'] | hare.pro/document/2?doc_id=171
+depth=2 | ['指数专题', '指数历史分钟'] | hare.pro/document/2?doc_id=419
+depth=2 | ['指数专题', '指数月线行情'] | hare.pro/document/2?doc_id=172
+depth=2 | ['指数专题', '指数成分和权重'] | share.pro/document/2?doc_id=96
+depth=2 | ['指数专题', '大盘指数每日指标'] | hare.pro/document/2?doc_id=128
+depth=2 | ['指数专题', '申万行业分类'] | hare.pro/document/2?doc_id=181
+depth=2 | ['指数专题', '申万行业成分（分级）'] | hare.pro/document/2?doc_id=335
+depth=2 | ['指数专题', '申万行业指数日行情'] | hare.pro/document/2?doc_id=327
+depth=2 | ['指数专题', '申万实时行情'] | hare.pro/document/2?doc_id=417
+depth=2 | ['指数专题', '中信行业成分'] | hare.pro/document/2?doc_id=373
+depth=2 | ['指数专题', '中信行业指数日行情'] | hare.pro/document/2?doc_id=308
+depth=2 | ['指数专题', '国际主要指数'] | hare.pro/document/2?doc_id=211
+depth=2 | ['指数专题', '指数技术面因子(专业版)'] | hare.pro/document/2?doc_id=358
+depth=2 | ['指数专题', '沪深市场每日交易统计'] | hare.pro/document/2?doc_id=215
+depth=2 | ['指数专题', '深圳市场每日交易情况'] | hare.pro/document/2?doc_id=268
