@@ -9,6 +9,21 @@
 | 数据来源 | 读 `my_stock` 生产库，写 `stock_research` 研究库 |
 | 关联项目 | `my-stock`（数据平台，负责 Tushare 同步和 Web 服务） |
 
+## 技术栈
+
+| 类别 | 库 / 工具 | 用途 |
+|------|----------|------|
+| **数据分析** | pandas, numpy | DataFrame 操作、数值计算、统计聚合 |
+| **统计** | scipy.stats | 分布检验、假设检验 |
+| **机器学习** | scikit-learn | GradientBoostingRegressor 等建模（少量使用） |
+| **ORM / 数据库** | SQLAlchemy 2.x, PyMySQL | ORM 映射、连接池、Raw SQL、MySQL 方言 |
+| **数据源** | tushare | A股行情/财务/资金流向等数据接口 |
+| **爬虫** | requests, BeautifulSoup, selenium, webdriver-manager | HTTP 请求、HTML 解析、浏览器自动化 |
+| **配置** | python-dotenv, pathlib | 环境变量加载、跨平台路径 |
+| **日志** | logging + RotatingFileHandler | 标准日志 + 文件轮转 |
+| **CLI** | argparse | 命令行参数解析 |
+| **外部依赖** | my-stock 项目 | 提供 `app.config.Config`、`app.database.engine`、`app.logger.get_logger` |
+
 ## 代码规范
 
 1. **最小实用**，只做需要的功能，不过度设计
@@ -89,24 +104,28 @@ my-stock-research/
 
 ### 文档命名
 
-文档命名: `010-简要描述.md`（任务文档）或 `{日期}-简要描述.md`（报告）。
+文档命名: `010-简要描述.md`（任务文档）
 
 标题下方第一行写上建立时间：
 ```
 # 文档标题
 **创建时间**: 20260318 17:05
 ```
+## 报告要求
+**禁止使用脚本生成报告，必须基于数据进行分析**
 
 ## 数据库
+
+**规则**:所有的项目可以任意读取数据，但是只能在自己的指定库里面写。
 
 ### 读取库（只读，由其他项目维护）
 
 | 库 | 说明 | 数据表目录 |
 |----|------|-----------|
-| `my_stock` | A股全量数据：行情K线、基本面、财务、资金流向、指数、宏观经济、LA选股 | `docs/010-my_stock数据表.md` |
-| `my_trend` | 舆情数据：东财热度排名、股吧情感、新闻LLM分析 | `docs/020-my_trend数据表.md` |
+| `my_stock` | A股全量数据：行情K线、基本面、财务、资金流向、指数、宏观经济、llm推荐股票数据（LA选股） | `docs/010-my_stock数据表.md` |
+| `my_trend` | 舆情数据：东财热度排名、股吧情感、基于新闻的股票基本面和情感分析 | `docs/020-my_trend数据表.md` |
 
-需要数据时先查上述文档。如需 Tushare 未同步的接口，查 `tushare_docs/interface_catalog.csv` 定位后自行调用。
+需要数据时先查上述文档。如需 Tushare 未同步的接口，查 `tushare_docs` 定位后自行调用。
 
 ### 写入库（每主题独立，自行创建）
 
@@ -126,13 +145,33 @@ my-stock-research/
 
 各主题连接配置在自己的 `scripts/config.py`，**不要跨主题共享写入库**。
 
+## 语雀上传
+
+**所有语雀操作仅限「股票分析」知识库，禁止操作其他知识库。**
+
+上传报告优先使用脚本：
+
+```bash
+python scripts/yuque_upload.py <目录路径> <本地md文件>
+
+# 一级目录
+python scripts/yuque_upload.py "030 - 指标分析" report.md
+
+# 多级目录（逗号分隔）
+python scripts/yuque_upload.py "070-工程文档,030-经验总结" report.md
+```
+
+脚本自动：读取目录 → 找最大编号 → 加编号前缀 → 上传 → 挂入目录 → 验证。失败退出码2交给大模型处理。
+
+目录结构详见 `docs/constraints/040-语雀目录约束.md`。
+
 ## 项目约束
 
 以下约束必须遵守：
 
 - **复权选型** — 个股指标计算禁止 bfq，详见 `docs/constraints/020-复权选型规则.md`
 - **牛熊分析标准** — 详见 `base/constraints/牛熊分析标准.md`
-- **语雀上传** — 必须按目录结构上传，详见 `docs/constraints/040-语雀目录约束.md`
+- **语雀上传** — 仅限「股票分析」知识库，优先使用 `scripts/yuque_upload.py`
 
 ## 注意事项
 
