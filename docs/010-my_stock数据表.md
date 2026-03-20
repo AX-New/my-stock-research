@@ -1,5 +1,5 @@
 # my_stock 数据表目录
-**最后更新**: 20260320
+**最后更新**: 20260320（基于本地 MySQL 实际抓取，共 127 张表）
 
 my-stock 项目维护，Tushare/AkShare 同步入库。**只读**。
 
@@ -23,6 +23,7 @@ my-stock 项目维护，Tushare/AkShare 同步入库。**只读**。
 | `market_weekly` | 个股周线行情 |
 | `market_monthly` | 个股月线行情 |
 | `adj_factor` | 复权因子（每日前复权/后复权系数） |
+| `stk_factor_pro` | 股票复权因子（专业版，含更多字段） |
 | `daily_basic` | 每日基础指标（PE/PB/PS/市值/换手率） |
 | `suspend_d` | 每日停复牌信息 |
 | `realtime_kline` | 个股实时日线（AkShare，TTL=15s） |
@@ -52,6 +53,8 @@ my-stock 项目维护，Tushare/AkShare 同步入库。**只读**。
 | `dc_member` | 东财概念板块成分股 |
 | `dc_daily` | 东财概念板块日线行情 |
 | `dc_hot` | 东财概念热度排名 |
+| `dc_concept` | 东财概念板块目录（含热度/强度/涨停等） |
+| `dc_concept_cons` | 东财概念板块成分（含板块名称/加入原因） |
 | `ths_index` | 同花顺概念指数列表 |
 | `ths_member` | 同花顺概念成分股 |
 | `ths_daily` | 同花顺概念指数日线行情 |
@@ -166,3 +169,45 @@ my-stock 项目维护，Tushare/AkShare 同步入库。**只读**。
 | `la_factor` | LA 因子值 |
 | `la_task` | LA 选股任务记录 |
 | `la_version` | LA 版本管理 |
+| `llm_stock_pick` | LLM 选股结果 |
+
+## 模拟交易
+
+| 表名 | 说明 |
+|------|------|
+| `sim_account` | 模拟交易虚拟账户（初始资金/当前净值/持仓市值/可用余额） |
+| `sim_daily_snapshot` | 每日权益快照（账户每个交易日的总资产/可用资金/持仓市值/当日盈亏） |
+| `sim_position` | 当前持仓明细（股票代码/持仓数量/成本价/当前市值） |
+| `sim_trade` | 交易记录流水（买入/卖出时间/价格/数量/手续费/印花税） |
+
+## 业务功能
+
+| 表名 | 说明 |
+|------|------|
+| `backtest` | 回测结果记录（股票/基金/资金、执行状态、年化收益/最大回撤/胜率等） |
+| `optimize_result` | 参数优化结果（AI调参模型每组参数对应的回测指标） |
+| `strategy` | 策略参数配置（策略名称/类型/参数JSON/测试代码） |
+| `portfolio` | 投资组合持仓（用户实际持有的股票代码/成本价/持仓比例） |
+| `stock_signal` | 模型选股信号记录 |
+| `hot_stock_track` | 热门股追踪 |
+| `watchlist` | 用户自选股（关注的股票及自定义分组） |
+| `watchlist_group` | 自选股分组（用户自定义分组名称和排序） |
+
+## 用户/安全
+
+| 表名 | 说明 |
+|------|------|
+| `user` | 用户账号（用户名/密码哈希/角色/状态） |
+| `login_attempt` | 登录尝试记录（登录时间/IP/成功/失败状态） |
+
+## 系统管理
+
+| 表名 | 说明 |
+|------|------|
+| `interface_meta` | Tushare 接口注册信息（接口名称/分类/API路径/文档地址） |
+| `tushare_docs` | Tushare 接口文档索引（分类/API名称/文档URL/本地文档路径） |
+| `sync_log` | 数据同步执行日志（接口/开始结束时间/数据量/状态/错误） |
+| `sync_failure` | 数据同步失败记录（异常详情/堆栈/参数/重试状态） |
+| `sync_batch_event` | 数据同步批量事件（各阶段状态：排队/执行中/完成/取消） |
+| `sys_schedule_task` | 定时任务注册表 |
+| `sys_schedule_log` | 定时任务执行日志 |
