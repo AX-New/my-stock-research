@@ -1,0 +1,34 @@
+{
+  "best_params": {
+    "fast_period": 14,
+    "slow_period": 40,
+    "signal_period": 11
+  },
+  "best_metrics": {
+    "sharpe": 0.1313,
+    "annual_return": 4.18,
+    "max_drawdown": 45.45,
+    "total_return": 73.38,
+    "win_rate": 39.29,
+    "profit_loss_ratio": 1.84,
+    "total_trades": 80
+  },
+  "generated_at": "2026-03-21 01:56:56",
+  "config": {
+    "stocks": [
+      "600519.SH",
+      "000858.SZ",
+      "600036.SH",
+      "601318.SH",
+      "000001.SZ",
+      "600000.SH",
+      "600028.SH",
+      "600276.SH"
+    ],
+    "start_date": "2015-01-01",
+    "end_date": "2025-12-31",
+    "commission_rate": 0.0003,
+    "stamp_duty_rate": 0.001,
+    "slippage_rate": 0.002
+  }
+}
