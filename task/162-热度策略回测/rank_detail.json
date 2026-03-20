@@ -1,0 +1,186 @@
+{
+  "total_stocks": 5490,
+  "latest_date": "2026-03-19",
+  "data": [
+    {
+      "code": "002491",
+      "cur_rank": 603,
+      "avg_rank_20d": 239.0,
+      "min_rank_20d": 25,
+      "max_rank_20d": 603,
+      "rank_surge": 2.52,
+      "heat_position": 1.0,
+      "percentile": 11.0,
+      "deal_yi": 11.13,
+      "rank_5d": [
+        382,
+        412,
+        347,
+        265,
+        603
+      ]
+    },
+    {
+      "code": "002272",
+      "cur_rank": 756,
+      "avg_rank_20d": 314.0,
+      "min_rank_20d": 15,
+      "max_rank_20d": 756,
+      "rank_surge": 2.4,
+      "heat_position": 1.0,
+      "percentile": 13.8,
+      "deal_yi": 7.14,
+      "rank_5d": [
+        666,
+        296,
+        438,
+        252,
+        756
+      ]
+    },
+    {
+      "code": "300812",
+      "cur_rank": 2416,
+      "avg_rank_20d": 1142.0,
+      "min_rank_20d": 142,
+      "max_rank_20d": 2416,
+      "rank_surge": 2.12,
+      "heat_position": 1.0,
+      "percentile": 44.0,
+      "deal_yi": 2.37,
+      "rank_5d": [
+        1771,
+        2125,
+        1878,
+        1521,
+        2416
+      ]
+    },
+    {
+      "code": "002519",
+      "cur_rank": 1103,
+      "avg_rank_20d": 553.0,
+      "min_rank_20d": 247,
+      "max_rank_20d": 1103,
+      "rank_surge": 1.99,
+      "heat_position": 1.0,
+      "percentile": 20.1,
+      "deal_yi": 3.46,
+      "rank_5d": [
+        882,
+        734,
+        676,
+        440,
+        1103
+      ]
+    },
+    {
+      "code": "002546",
+      "cur_rank": 1128,
+      "avg_rank_20d": 440.0,
+      "min_rank_20d": 128,
+      "max_rank_20d": 1128,
+      "rank_surge": 2.56,
+      "heat_position": 1.0,
+      "percentile": 20.5,
+      "deal_yi": 3.26,
+      "rank_5d": [
+        649,
+        660,
+        763,
+        786,
+        1128
+      ]
+    },
+    {
+      "code": "002131",
+      "cur_rank": 110,
+      "avg_rank_20d": 66.0,
+      "min_rank_20d": 24,
+      "max_rank_20d": 123,
+      "rank_surge": 1.67,
+      "heat_position": 0.8687,
+      "percentile": 2.0,
+      "deal_yi": 27.54,
+      "rank_5d": [
+        117,
+        51,
+        52,
+        36,
+        110
+      ]
+    },
+    {
+      "code": "002842",
+      "cur_rank": 656,
+      "avg_rank_20d": 306.0,
+      "min_rank_20d": 36,
+      "max_rank_20d": 656,
+      "rank_surge": 2.14,
+      "heat_position": 1.0,
+      "percentile": 11.9,
+      "deal_yi": 9.45,
+      "rank_5d": [
+        518,
+        512,
+        322,
+        521,
+        656
+      ]
+    },
+    {
+      "code": "600487",
+      "cur_rank": 263,
+      "avg_rank_20d": 115.0,
+      "min_rank_20d": 28,
+      "max_rank_20d": 263,
+      "rank_surge": 2.28,
+      "heat_position": 1.0,
+      "percentile": 4.8,
+      "deal_yi": 39.45,
+      "rank_5d": [
+        130,
+        150,
+        106,
+        159,
+        263
+      ]
+    },
+    {
+      "code": "002378",
+      "cur_rank": 291,
+      "avg_rank_20d": 123.0,
+      "min_rank_20d": 7,
+      "max_rank_20d": 291,
+      "rank_surge": 2.36,
+      "heat_position": 1.0,
+      "percentile": 5.3,
+      "deal_yi": 27.13,
+      "rank_5d": [
+        176,
+        174,
+        202,
+        216,
+        291
+      ]
+    },
+    {
+      "code": "605007",
+      "cur_rank": 1803,
+      "avg_rank_20d": 910.0,
+      "min_rank_20d": 327,
+      "max_rank_20d": 1803,
+      "rank_surge": 1.98,
+      "heat_position": 1.0,
+      "percentile": 32.8,
+      "deal_yi": 1.31,
+      "rank_5d": [
+        1121,
+        1123,
+        1214,
+        1770,
+        1803
+      ]
+    }
+  ]
+}
