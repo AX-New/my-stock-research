@@ -132,8 +132,8 @@ my-stock-research/
 
 | 库 | 说明 | 数据表目录 |
 |----|------|-----------|
-| `my_stock` | A股全量数据：行情K线、基本面、财务、资金流向、指数、宏观经济、llm推荐股票数据（LA选股） | `docs/010-my_stock数据表.md` |
-| `my_trend` | 舆情数据：东财热度排名、股吧情感、基于新闻的股票基本面和情感分析 | `docs/020-my_trend数据表.md` |
+| `my_stock` | A股全量数据：行情K线、基本面、财务、资金流向、指数、宏观经济、llm推荐股票数据（LA选股）<br>本地连接: 127.0.0.1:3307, 密码: root | `docs/010-my_stock数据表.md` |
+| `my_trend` | 舆情数据：东财热度排名、股吧情感、基于新闻的股票基本面和情感分析<br>本地SSH隧道: 127.0.0.1:3310（需启动 `Desktop\Tssh-tunnel.bat`），密码: root | `docs/020-my_trend数据表.md` |
 
 需要数据时先查上述文档。如需 Tushare 未同步的接口，查 `tushare_docs` 定位后自行调用。
 
