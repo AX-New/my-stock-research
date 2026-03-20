@@ -1,0 +1,9 @@
+{
+  "lookback": 30,
+  "buy_threshold": 0.9,
+  "sell_threshold": 0.2,
+  "min_deal_amount": 10000000.0,
+  "n_positions": 3,
+  "sort_by": "rank_surge",
+  "max_hold_days": 9999
+}
