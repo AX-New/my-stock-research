@@ -111,37 +111,86 @@ def save_state(state: dict):
     logger.info(f"持仓状态已保存: {STATE_FILE}")
 
 
-def load_recent_heat_data(lookback: int) -> pd.DataFrame:
+def load_trading_days_recent(lookback: int) -> list:
     """
-    从 my_trend.popularity_rank 加载近期热度排名数据
+    从 my_stock.trade_cal 加载最近 lookback + 10 个交易日
 
-    加载 lookback + 10 天的数据（多余部分确保滚动窗口有足够数据）。
+    多取 10 天保证滚动窗口预热有足够数据。
 
     Args:
         lookback: 策略回看窗口天数
 
     Returns:
+        list of datetime.date，已排序
+    """
+    engine = get_stock_engine()
+    need_days = lookback + 10
+    # 用 Python 生成今日日期字符串，避免 DATE_FORMAT 中 %Y 被 PyMySQL 转义
+    today_int = date.today().strftime('%Y%m%d')
+    sql = f"""
+        SELECT cal_date FROM trade_cal
+        WHERE is_open = 1
+          AND cal_date <= '{today_int}'
+        ORDER BY cal_date DESC
+        LIMIT {need_days}
+    """
+    df = pd.read_sql(sql, engine)
+    trading_days = sorted(pd.to_datetime(df['cal_date'], format='%Y%m%d').dt.date.tolist())
+    logger.info(f"加载最近交易日: {len(trading_days)} 天 ({trading_days[0]} ~ {trading_days[-1]})")
+    return trading_days
+
+
+def load_recent_heat_data(lookback: int, trading_days: list = None) -> pd.DataFrame:
+    """
+    从 my_trend.popularity_rank 加载近期热度排名数据
+
+    重要：只加载交易日的数据，与回测保持一致。
+    popularity_rank 可能包含周末/节假日数据（来自 --init 回填），
+    必须过滤到交易日以确保 lookback 窗口含义与回测一致。
+
+    Args:
+        lookback: 策略回看窗口天数
+        trading_days: 交易日列表（如不传则自动加载）
+
+    Returns:
         热度排名 DataFrame（stock_code, date, rank, deal_amount）
     """
+    # 获取交易日列表
+    if trading_days is None:
+        trading_days = load_trading_days_recent(lookback)
+
     engine = get_trend_engine()
-    # 多取 10 天防止节假日空缺
-    extra_days = lookback + 10
+    # 用交易日范围查询，避免加载非交易日数据
+    start_date = trading_days[0].strftime('%Y-%m-%d')
+    end_date = trading_days[-1].strftime('%Y-%m-%d')
 
     sql = f"""
         SELECT stock_code, date, `rank`, deal_amount
         FROM popularity_rank
-        WHERE date >= DATE_SUB(CURDATE(), INTERVAL {extra_days} DAY)
+        WHERE date >= '{start_date}' AND date <= '{end_date}'
         ORDER BY date ASC
     """
     df = pd.read_sql(sql, engine)
     df['date'] = pd.to_datetime(df['date']).dt.date
-    logger.info(f"加载热度数据: {len(df):,} 条，{df['date'].nunique()} 天")
+
+    # 过滤到交易日（关键：与回测 strategy.py _compute_heat_position 逻辑一致）
+    td_set = set(trading_days)
+    before_filter = len(df)
+    df = df[df['date'].isin(td_set)].copy()
+    filtered_out = before_filter - len(df)
+    if filtered_out > 0:
+        logger.info(f"  过滤非交易日数据: {filtered_out:,} 条（周末/节假日）")
+
+    logger.info(f"加载热度数据: {len(df):,} 条，{df['date'].nunique()} 个交易日")
     return df
 
 
 def load_recent_price_data(stock_codes: list) -> pd.DataFrame:
     """
     从 my_stock.market_daily 加载指定股票最新前复权价格
+
+    正确计算前复权价格：qfq_close = close * adj_factor / latest_adj_factor
+    与 data_loader.py 保持一致。
 
     Args:
         stock_codes: 6 位股票代码列表
@@ -167,15 +216,17 @@ def load_recent_price_data(stock_codes: list) -> pd.DataFrame:
         FROM market_daily m
         JOIN adj_factor a ON m.ts_code = a.ts_code AND m.trade_date = a.trade_date
         WHERE m.ts_code IN ('{codes_str}')
-          AND m.trade_date >= DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 DAY), '%Y%m%d')
+          AND m.trade_date >= DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 10 DAY), '%Y%m%d')
         ORDER BY m.trade_date DESC
     """
     df = pd.read_sql(sql, engine)
     df['stock_code'] = df['ts_code'].str[:6]
     df['date'] = pd.to_datetime(df['trade_date'], format='%Y%m%d').dt.date
 
-    # 前复权价格（基于每只股票所有历史数据计算，这里只能用当前 adj_factor）
-    df['qfq_close'] = df['close']  # 近期数据，adj_factor 相差极小，近似处理
+    # 正确计算前复权价格（与 data_loader.py 一致）
+    # qfq_close = close * adj_factor / latest_adj_factor
+    latest_adj = df.groupby('stock_code')['adj_factor'].transform('first')  # DESC排序，first=最新
+    df['qfq_close'] = df['close'] * df['adj_factor'] / latest_adj
     return df
 
 
@@ -183,17 +234,19 @@ def compute_heat_signal(heat_df: pd.DataFrame, params: dict) -> tuple:
     """
     计算当日热度信号
 
+    前提：heat_df 已经过滤到交易日（由 load_recent_heat_data 完成），
+    rolling(window=lookback) 滚过的是交易日数量，与回测 strategy.py 一致。
+
     Args:
-        heat_df: 热度排名 DataFrame
+        heat_df: 仅含交易日的热度排名 DataFrame
         params:  策略参数
 
     Returns:
-        (today_heat_position, today_rank_surge, today_deal) 三个 Series
-        index 为 stock_code，value 为对应指标值
+        (today_heat_position, today_rank_surge, today_deal, today_date) 元组
     """
     lookback = params['lookback']
 
-    # 取最近的交易日数据（按 date 去重，保留最新）
+    # heat_df 已过滤为交易日，dates 即交易日序列
     dates = sorted(heat_df['date'].unique())
     if len(dates) < lookback // 2:
         logger.warning(f"热度数据天数不足（{len(dates)} < {lookback // 2}），信号可能不准确")
@@ -245,9 +298,10 @@ def generate_signal(params: dict) -> dict:
     logger.info(f"生成信号日期: {today_str}")
     logger.info(f"使用参数: {params}")
 
-    # ---- 1. 加载热度数据 ----
+    # ---- 1. 加载交易日和热度数据（仅交易日，与回测一致） ----
     lookback = params.get('lookback', 20)
-    heat_df = load_recent_heat_data(lookback)
+    trading_days = load_trading_days_recent(lookback)
+    heat_df = load_recent_heat_data(lookback, trading_days)
 
     if len(heat_df) == 0:
         logger.error("热度数据为空，无法生成信号")
@@ -256,6 +310,14 @@ def generate_signal(params: dict) -> dict:
     # ---- 2. 计算信号 ----
     today_hp, today_rs, today_deal, data_date = compute_heat_signal(heat_df, params)
     logger.info(f"热度数据最新日期: {data_date}")
+
+    # 数据新鲜度检查：最新数据应为最近交易日
+    latest_td = trading_days[-1]
+    if data_date != latest_td:
+        logger.warning(f"⚠️ 数据可能不新鲜！热度最新={data_date}，最近交易日={latest_td}")
+        if (latest_td - data_date).days > 3:
+            logger.error(f"❌ 数据严重滞后（{(latest_td - data_date).days}天），放弃生成信号")
+            return {}
 
     # ---- 3. 读取持仓状态 ----
     state = load_state()
