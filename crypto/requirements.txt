@@ -1,0 +1,19 @@
+# 加密货币量化交易系统 - Python 依赖
+
+# Web 框架
+fastapi>=0.109.0
+uvicorn>=0.27.0
+
+# 数据库
+sqlalchemy>=2.0.0
+pymysql>=1.1.0
+
+# 交易所 API
+ccxt>=4.0.0
+
+# 数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 配置
+python-dotenv>=1.0.0
